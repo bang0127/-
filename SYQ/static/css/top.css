@@ -1,0 +1,80 @@
+body{
+    padding: 0;
+    margin: 0;
+}
+
+/* 网页顶部 */
+#top{
+    margin: 0;
+    padding: 0;
+    height: 60px;
+    width: 100%;
+    background-color:rgb(90, 160, 240);
+    position: relative;
+}
+.top-title{
+    position: absolute;
+    left: 320px;
+}
+
+.top-title .title{
+    margin: 0;
+    padding: 0;
+    line-height:60px; 
+    color:#fff;
+}
+.top-list{
+    position: absolute;
+    left: 480px;
+}
+.top-list ul{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+.top-list ul li{
+    line-height: 60px;
+    float: left;
+    margin-right: 30px;
+}
+.top-list ul li a{
+    text-decoration: none;
+    color: #fff;
+}
+/* .top-search-box{
+    position: absolute;
+    right: 560px;
+    line-height: 60px;
+    width: 280px;
+    height: 60px;
+}
+.top-search-box input{
+    outline: none;
+    border: none;
+    height:28px;
+    width: 210px;
+    padding-left: 10px;
+    border-radius: 4px 0 0 4px;
+}
+.top-search-box button{
+    height: 30px;
+    background-color: #eee;
+    border: none;
+    border-radius: 0 4px 4px 0;
+}
+.top-search-box input,button{
+    float: left;
+    position: relative;
+    top:15px;
+} */
+.top-right{
+    position: absolute;
+    left: 1360px;
+}
+.top-right a{
+    line-height: 60px;
+    text-decoration:none;
+    font-size: 14px;
+    color: #fff;
+    font-weight: 550;
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+    <link rel="stylesheet" href="/static/css/login.css">
+    <style>
+        #wuid{
+            width: 0;
+            height: 0;
+            border: none;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="bkg">
+    </div>
+    <div id="box">
+        {% if wuid %}
+            <h1>微博绑定注册</h1>
+        {% else %}
+            <h1>register</h1>
+        {% endif %}
+        <hr>
+        <div id="form">
+            <form action="/user/register" method="POST">
+                {% csrf_token %}
+                <div>
+                    <label for="">用户名：</label>
+                    <input type="text" name="username"><span id="show"></span>
+                </div>
+                <div>
+                    <label for="">密 码：</label>
+                    <input type="password" name="pwd">
+                </div>
+                <div>
+                    <label for="">重复密码：</label>
+                    <input type="password" name="rpwd">
+                </div>
+                <input id="wuid" type="text" name="wuid" value="{{ wuid }}">
+                <div>
+                    <input class="btn" type="submit" value="注 册">
+                </div>
+                {% if error %}
+                    <script>alert('{{ error }}')</script>
+                {% elif success %}
+                    {{ success }}<a href="/user/login">点击登录</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    
+</body>
+</html>

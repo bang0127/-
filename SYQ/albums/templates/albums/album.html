@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>相册</title>
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            background-color: #eeeeee;
+        }
+        #mesage-box{
+            width: 1200px;
+            height: 300px;
+            position: relative;
+            left: 50%;
+            margin-left: -600px;
+        }
+        #owner-box{
+            width: 300px;
+            height: 200px;
+            display: inline-block;
+            border-radius: 10px 10px 10px 10px;
+            background-color: #fff;
+            float: left;
+            margin-top: 50px;
+            margin-left: 30px
+        }
+
+        #owner-box .avatar{
+            width: 80px;
+            height: 80px;
+            background-image: url('/static/imgs/avatar.jpg');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            border-radius: 50% 50% 50% 50%;
+            /* display: inline-block; */
+            margin: 8px 8px 8px 8px;
+            float: left;
+        }
+        #owner-box .owner-msg{
+            height: 88px;
+            width: 200px;
+            display: inline-block;
+            /* line-height: 88px; */
+            position: relative;
+        }
+        .owner-msg .name{
+            line-height: 58px;
+            font-weight: 700;
+            padding-left: 20px;
+        }
+        .owner-msg .sign{
+            color: #aaa;
+        }
+        #album-box{
+            width: 800px;
+            height: 200px;
+            border-radius: 8px 8px 8px 8px;
+            margin-left: 40px;
+            margin-top: 50px;
+            /* float: left; */
+            display: inline-block;
+        }
+        .album-title,.album-content{
+            width: 800px;
+            background-color: #fff;
+            border-radius: 8px 8px 8px 8px;
+        }
+        .album-title{
+            height: 50px;
+        }
+        .album-title span{
+            margin-left: 26px;
+            font-weight: 700;
+            font-size: 24px;
+            line-height: 50px;
+        }
+        .album-content{
+            height: 130px;
+            margin-top: 20px;
+        }
+        .album-content span{
+            margin: 0 0 0 6px;
+        }
+        .album-content p{
+            margin:8px 20px 0px 32px
+        }
+        #pictures{
+            text-align: center;
+        }
+        .picture{
+            height: 60%;
+            width: 60%;
+            margin-top: 30px
+        }
+        .relation-box{
+            margin-top: 10px;
+            margin-left: 10px;
+            width: 100px;
+            height: 38px;
+            
+        }
+        .relation-box .relation{
+            display: inline-block;
+            width: 76px;
+            height: 30px;
+            background-image: url('/static/imgs/albumBg.png');
+            background-position:358px -130px;
+            border-radius: 4px;
+        }
+        .relation:hover{
+            background-position:358px -160px;
+        }
+    </style>
+    <script src="/static/js/jquery-1.11.3.js"></script>
+</head>
+<body>
+    <div id="mesage-box">
+        <div id="owner-box">
+            {% if owner.avatar %}
+            <div class="avatar" style="background-image: url(/media/{{ owner.avatar }})">
+            </div>
+            {% else %}
+            <div class="avatar">
+            </div>
+            {% endif %}
+            <div class="owner-msg">
+                    <span class="name">
+                        {% if owner.nickname %}
+                            {{ owner.nickname }}
+                        {% else %}
+                            {{ owner.username }}
+                        {% endif %}
+                    </span><br>
+                    <span class="sign">
+                        {% if owner.sign %}
+                            个性签名:{{ owner.sign }}
+                        {% else %}
+                            个性签名:暂无
+                        {% endif %}
+                    </span>
+            </div>
+            <div class="relation-box">
+                    <a class="relation"></a>
+            </div>
+            <hr style="border:solid 1px #eee">
+        </div>
+
+        <div id="album-box">
+            <div class="album-title">
+                <span>{{ album.title }}</span>
+            </div>
+            <div class="album-content">
+                <span>简介:</span>
+                <p class="content">{{ album.content }}</p>
+            </div>
+        </div>
+    </div>
+    
+    
+        
+        <div id="pictures">
+                {% for picture in pictures %}
+                <!-- <div class="img" style="background:url('/media/{{ picture.path }}')">
+        
+                </div> -->
+                <img class="picture" src="/media/{{ picture.path }}" alt="">
+                {% endfor %}
+        </div>
+    
+    <script>
+        var username = window.localStorage.getItem('syq_user');
+        var ownername = '{{ owner.username }}'
+        $(function(){
+            url = '/user/relation?username='+username+'&ownername='+ownername; 
+            $.ajax({
+                type:'get',
+                url:url,
+                success:function(result){
+                    if (result.code==200){
+                        $('.relation').css({'background-position':'358px -190px','pointer-events':'none'});
+                        // $('.relation').css({'pointer-events':'none'})
+                    }else if(result.code==60104){
+                        $('.relation').css({'display':'none'});
+                    }
+                }
+            })
+            
+            $('.relation').click(
+                function (){
+                    data = {"username":username,"ownername":ownername}
+                    $.ajax({
+                        type:'post',
+                        contentType:'application/json',
+                        dataType:'json',
+                        url:'/user/relation',
+                        data:JSON.stringify(data),
+                        beforeSend:function(request){
+                            var token = window.localStorage.getItem('syq_token')
+                            request.setRequestHeader("Authorization", token);
+                        },
+                        success:function(result){
+                            if (result.code==200){
+                                alert('关注成功')
+                                window.location.reload();
+                            }else{
+                                alert(result.error)
+                                window.location='/user/login'
+                            }
+                        }
+                    })
+                }
+            )
+
+        })
+    </script>
+    
+    
+</body>
+</html>

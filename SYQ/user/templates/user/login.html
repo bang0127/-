@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户登录</title>
+    <link rel="stylesheet" href="/static/css/login.css">
+    <script src="/static/js/jquery-1.11.3.js"></script>
+</head>
+<body>
+    <div id="bkg"></div>
+    <div id="box">
+        <h1>login</h1>
+        <hr>
+        <div id="form">
+            {% csrf_token %}
+            <!-- <form action="/user/login" method="POST"> -->
+                <div>
+                    <label for="">用户名:</label>
+                    <input type="text" name="username" placeholder="请输入用户名:" id="username">
+                </div>
+                <div>
+                    <label for="">密 码:</label>
+                    <input type="password" name="password" placeholder="请输入密码" id="password">
+                </div>
+                <div>
+                    <!-- <input type="checkbox" name="save_cookei">记住我 -->
+                </div>
+                <div>
+                    <button class="btn" onclick="login()" >登录</button>
+                </div>
+                <button onclick="weibo()">微博登录</button>
+            <!-- </form> -->
+        </div>
+    </div>
+    <script>
+    function login(){
+        var username = $('#username').val();
+        var password = $('#password').val();
+        var post_data = {'username':username,'password':password};
+
+        $.ajax({
+            type:'post',
+            contentType:'application/json',
+            dataType:'json',
+            url:'/tokens/',
+            data:JSON.stringify(post_data),
+            success:function (result){
+                if (200 == result.code){
+                    window.localStorage.setItem('syq_token',result.data.token);
+                    window.localStorage.setItem('syq_user',result.username);
+                    alert('登录成功')
+
+                    window.location =  '/index';
+
+                }else{
+                    alert(result.error)
+                }
+            }
+
+        });
+
+
+
+    }
+    function weibo(){
+        $.ajax({
+            type:'get',
+            dataType:'json',
+            url:'http://127.0.0.1:8000/user/weibo/url',
+            success:function(result){
+                if (result.code == 200){
+                    console.log(result)
+                    window.location = result.oauth_url
+                }else{
+                    alert('Get weibo url error')
+                }
+            }
+        })
+    }
+    </script>
+</body>
+</html>

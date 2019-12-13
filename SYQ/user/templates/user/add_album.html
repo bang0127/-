@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>添加相册</title>
+    <script src="/static/js/jquery-1.11.3.js"></script>
+    <style>
+        /* #upload-picture{
+            display: inline-block;
+            height: 100px;
+            width: 100px;
+            border: solid 1px #aaa;
+            border-radius: 6px 6px 6px 6px;
+            text-align:center;
+        }
+        #upload-picture span{
+            line-height: 150px;
+            color: #aaa;
+        }
+        #picture{
+            display: none;
+        } */
+        .imgdiv {
+				width: 1000px;
+				height: auto;
+				margin: 10px;
+				
+        }
+        
+        .imgdiv img {
+            width: 150px;
+            height: 150px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <label for="">标题</label>
+    <input type="text" name="title" id="title">
+    <label for="">相册简介</label>
+    <textarea name="content" id="content" cols="50" rows="20"></textarea>
+    <label for="" id='upload-picture' onclick="clickupload()">
+        <span>点击添加图片</span>
+    </label>
+    <input type="file" id="upload" multiple='multiple'>
+    <input id="submit-btn" type="button" value="上传" onclick="upload()">
+    
+    <div id="img-con" class="panel panel-default imgdiv">
+
+	</div>
+    <script>
+        var flag=0;
+        var formdata = new FormData();
+        var fileArray = new Array();
+
+        function clickupload(){
+            $('#upload').click()
+        }
+
+        $(function() {
+            $("#upload").change(function() {
+                // console.log(this.files.length)
+                for (i=0;i<this.files.length;i++){
+                    flag=flag+1;
+                    if(flag>10) return;
+                    var path= getImgPath(this.files[i]);
+                    uploadImg(path);
+                    // console.log("--------"+path);
+                    addfile(this.files[i]);
+                }		
+            });
+        });		
+        //动态显示上传图片
+        function uploadImg(path) {
+            var imgDiv = $("#img-con");
+            var $img = $("<img/>");
+            $img.attr("src", path);
+            imgDiv.append($img);
+        }
+        //获取要上传单张图片的本地路径
+        function getImgPath(file) {
+            var url = null;
+            if(window.createObjectURL != undefined) { // basic
+                url = window.createObjectURL(file);
+            } else if(window.URL != undefined) { // mozilla(firefox)
+                url = window.URL.createObjectURL(file);
+            } else if(window.webkitURL != undefined) { // webkit or chrome
+                url = window.webkitURL.createObjectURL(file);
+            }
+            return url;
+        }
+        function addfile(file){
+            fileArray.push(file)
+            console.log(fileArray)
+        }
+
+
+        function upload(){
+            var username = window.localStorage.getItem('syq_user')
+            var url = 'http://127.0.0.1:8000/user/add_album'
+            var title = $('#title').val();
+            var content = $('#content').val();
+            for(i=0;i<fileArray.length;i++){
+                num =String(i)
+                formdata.append(num,fileArray[i]);
+            };
+            // console.log(formdata)
+            var post_data = {"username":username,"title":title,"content":content}
+            $.ajax({
+                type:'post',
+                contentType:'application/json',
+                dataType:'json',
+                url:url,
+                data:JSON.stringify(post_data),
+                beforeSend: function(request) {
+                    var token = window.localStorage.getItem('syq_token')
+                    request.setRequestHeader("Authorization", token);
+                },
+                success:function (result){
+                    if (200 == result.code){
+                        var album = result.album
+                        $.ajax({
+                            processData: false,
+                            contentType: false,
+                            url: '/albums/album'+album+'/add_picture',
+                            type: 'post',
+                            data: formdata,
+                            beforeSend: function(request) {
+                                var token = window.localStorage.getItem('syq_token')
+                                request.setRequestHeader("Authorization", token);
+                            },
+                            success: function(arg) {
+                                if (arg.code == 200) {
+                                    alert('图片上传成功！')
+                                    window.location.reload()
+                                } 
+                                else {
+                                    alert(arg.error)
+                                }
+                            }
+                        })  
+                    }else{
+                        alert(result.error)
+                    }
+            }
+
+            })
+
+
+        }
+
+    </script>
+
+</body>
+</html>

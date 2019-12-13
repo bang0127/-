@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/css/top.css">
+    <script src="/static/js/jquery-1.11.3.js"></script>
+    <link rel="stylesheet" href="/static/css/userCenter.css">
+    <script src="/static/js/userCenter.js"></script>
+</head>
+<body>
+    <div id="top">
+        <div class="top-title">
+            <h2 class="title">个人中心</h2>
+        </div>
+        <div class="top-list">
+            <ul>
+                <li>
+                    <a href="/index">首页</a>
+                </li>
+                <li>
+                    <a class="userCenter" href="#">个人中心</a>
+                </li>
+                <li>
+                    <a href="#">我的动态</a>
+                </li>
+                <li>
+                    <a class="add-album" href="#">上传图片</a>
+                </li>
+            </ul>
+        </div>
+        <div class="top-right">
+            <a href="#">用户:{{ username }} |</a>
+            <a href="/index" onclick="logout()">退出登录</a>
+        </div>
+        
+    </div>
+    <div id="personal-box">
+        <div id="user-box">
+            {% if avatar %}
+            <div class="user-avatar" style="background-image:url({{ avatar }})"></div>
+            {% else %}
+                <div class="user-avatar"></div>
+            {% endif %}
+
+            {% if nickname %}
+                <h4 class="user-nickname">{{ nickname }}</h4>
+            {% else %}
+                <h4 class="user-nickname">{{ username }}</h4>
+            {% endif %}
+            {% if sign %}
+                <span class="user-sign">个性签名:{{ sign }}</span>
+            {% else %}
+                <span class="user-sign">个性签名:暂无</span>
+            {% endif %}
+        </div>
+        <div id="relation-b">
+            <span>关注</span>
+            <a href="">{{ b }}</a>
+        </div>
+        <div id="relation-a">
+            <span>粉丝</span>
+            <a href="">{{ a }}</a>
+        </div>
+
+        <div id="left-menu">
+            <ul id="person-base">
+                <li class="userinfoLi selected"><a class="personInfo" href="#">个人资料</a></li>
+                <li class="useralbumsLi"><a class="personAlbums" href="#">我的相册</a></li>
+                <li class="relationbLi"><a class="myB" href="#">我的关注</a></li>
+                <li class="relationaLi"><a class="myFans" href="#">我的收藏</a></li>
+                <li class="dustbinLi"><a class="dustbin" href="#">回收站</a></li>
+            </ul>
+            <ul id="person-save">
+                <li class="modpwdLi"><a class="modPass" href="#">修改密码</a></li>
+                <li class="bindPhoneLi"><a class="bindPhone" href="#">绑定手机</a></li>
+                <li class="bindEmailLi"><a class="bindEmail" href="#">绑定邮箱</a></li>
+            </ul>
+        </div>  
+        <h3 id="selected-title">
+            个人资料
+        </h3>
+        <div id="detail-show">个人资料</div>
+    </div>
+    
+    <script>
+        function logout(){
+            window.localStorage.removeItem('syq_token');
+            window.localStorage.removeItem('syq_user');
+        }
+
+        
+    </script>
+</body>
+</html>

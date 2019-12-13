@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>相册主页</title>
+    <script src="/static/js/jquery-1.11.3.js"></script>
+    <link rel="stylesheet" href="/static/css/albums.css">
+    <style>
+        body{
+            padding: 0;
+            margin: 0;
+        }
+        #ownerHead{
+            width: 100%;
+            height: 600px;
+        }
+        #headbg-img{
+            width: 100%;
+            height: 320px;
+            overflow: hidden;
+        }
+        #headbg-img img{
+            height: 100%;
+            width: 100%;
+        }
+        #avatar-box{
+            width: 106px;
+            height: 106px;
+            float: left;
+            position: absolute;
+            top:263px;
+            left: 50%;
+            margin-left: -56px;
+            border: solid 4px #fff;
+            border-radius: 50%;
+            background-image: url('/static/imgs/avatar.jpg');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        #owner-msg-box{
+            position: absolute;
+            top:380px;
+            width: 1200px;
+            height: 150px;
+            left: 50%;
+            margin-left: -600px;
+            text-align: center;
+        }
+        #owner-name h4{
+            margin: 6px 0;
+        }
+        #owner-sign span{
+            color: #aaa;
+            margin: 6px 0 10px 0;
+            display: inline-block;
+        }
+        .relation-box{
+            margin-top: 10px;
+            margin-left: 10px;
+            width: 100px;
+            height: 38px;
+            position: relative;
+            left: 50%;
+            margin-left: -50px;
+        }
+        .relation-box .relation{
+            display: inline-block;
+            width: 76px;
+            height: 30px;
+            background-image: url('/static/imgs/albumBg.png');
+            background-position:358px -130px;
+            border-radius: 4px;
+        }
+        .relation:hover{
+            background-position:358px -160px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="black-top"></div>
+    <div id="ownerHead">
+        <div id="headbg-img">
+            <img src="/static/imgs/headBg.jpg" alt="背景">
+        </div>
+        {% if data.avatar %}
+            <div id="avatar-box" style="background-image:url('{{ data.avatar }}')"></div>
+        {% else %}
+            <div id="avatar-box"></div>
+        {% endif %}
+        <div id="owner-msg-box">
+            <div id="owner-name">
+                <h4>
+                    {% if data.nickname %}
+                        {{ data.nickname }}
+                    {% else %}
+                        {{ data.username }}
+                    {% endif %}
+                </h4>
+            </div>
+            <div id="owner-sign">
+                <span>
+                    {% if data.sign %}
+                        个性签名:{{ data.sign }}
+                    {% else %}
+                        个性签名:暂无
+                    {% endif %}
+                </span>
+            </div>
+            <div id="like-fans">
+                <span>关注:{{ data.b }} | 粉丝:{{ data.a }}</span>
+            </div>
+            <div class="relation-box">
+                <a class="relation"></a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="albums-bg">
+        <div id="albums-box">
+            <ul id="albums">
+    
+            </ul>
+        </div>
+    </div>
+   
+    <script>
+        var username = window.localStorage.getItem('syq_user');
+        var ownername = '{{ ownername }}'
+        $(function(){
+            url = '/user/relation?username='+username+'&ownername='+ownername; 
+            $.ajax({
+                type:'get',
+                url:url,
+                success:function(result){
+                    if (result.code==200){
+                        $('.relation').css({'background-position':'358px -190px','pointer-events':'none'});
+                        // $('.relation').css({'pointer-events':'none'})
+                    }else if(result.code==60104){
+                        $('.relation').css({'display':'none'});
+                    }
+                }
+            })
+            $.ajax({
+                type:'get',
+                url:'/albums/'+ownername,
+                data:{'username':username},
+                success:function(result){
+                    if (200==result.code){
+                       albums_html = '';
+                       $.each(result.data,function(i,obj){
+                            albums_html+='<li>';
+                                albums_html+='<div class="album-img">';
+                                    albums_html+='<a class="img" href="/albums/album'+ obj.id +'" style="background-image:url('+obj.cover+'" ></a>';
+                                albums_html+='</div>';
+                                albums_html+='<div class="album-title">';
+                                    albums_html+='<a class="title" href="/albums/album'+ obj.id +'">'+ obj.title +'</a>';
+                                albums_html+='</div>';
+                                albums_html+='<div class="album-info">';
+                                    albums_html+='<a class="album-like" value="' + obj.id + '"></a><span>'+ obj.likes +'</span>';
+                                    if(obj.is_collected){
+                                        albums_html+='<a class="album-collect collected" value="' + obj.id + '"></a><span>'+ obj.collects +'</span>';
+                                    }else{
+                                        albums_html+='<a class="album-collect" value="' + obj.id + '"></a><span>'+ obj.collects +'</span>';
+                                    }
+                                albums_html+='</div>';
+                                albums_html+='<div class="album-owner">';
+                                    albums_html+='<span class="datetime">'+ obj.created_time +'</span>'
+                                albums_html+='</div>';
+                            albums_html+='</li>';
+
+                       })
+                       $('#albums').html(albums_html);
+                       // 点赞
+                       $('.album-like').on('click',function(){ 
+                            $id = $(this)
+                            var id = $id.attr('value');
+                            data_dic = {'id':id};
+                            if ($(this).attr('class')=='album-like'){
+                                $.ajax({
+                                    type:'post',
+                                    dataType:'json',
+                                    url:'/albums/album/likes',
+                                    data:JSON.stringify(data_dic),
+                                    beforeSend:function(request){
+                                        var token = window.localStorage.getItem('syq_token')
+                                        request.setRequestHeader('Authorization',token);
+                                    },
+                                    success:function(result){
+                                        if(result.code==200){
+                                            $id.toggleClass('like')
+                                            num = $id.next().text()
+                                            num = parseInt(num)
+                                            $id.next().html(num+1)
+                                        }else{
+                                            alert(result.error)
+                                        }
+                                    }
+                                })
+                            }else{
+                                $.ajax({
+                                    type:'put',
+                                    dataType:'json',
+                                    url:'/albums/album/likes',
+                                    data:JSON.stringify(data_dic),
+                                    beforeSend:function(request){
+                                        var token = window.localStorage.getItem('syq_token')
+                                        request.setRequestHeader('Authorization',token);
+                                    },
+                                    success:function(result){
+                                        if(result.code==200){
+                                            $id.toggleClass('like')
+                                            num = $id.next().text()
+                                            num = parseInt(num)
+                                            $id.next().html(num-1)
+                                        }else{
+                                            alert(result.error)
+                                        }
+                                    }
+                                })
+                            }
+                            
+                            
+                        })
+                       // 收藏
+                       $('.album-collect').on('click',function(){ 
+                            $id = $(this)
+                            var id = $id.attr('value');
+                            data_dic = {'id':id,'username':username};
+                            if ($(this).attr('class')=='album-collect'){
+                                $.ajax({
+                                    type:'post',
+                                    dataType:'json',
+                                    url:'/albums/album/collect',
+                                    data:JSON.stringify(data_dic),
+                                    beforeSend:function(request){
+                                        var token = window.localStorage.getItem('syq_token')
+                                        request.setRequestHeader('Authorization',token);
+                                    },
+                                    success:function(result){
+                                        if(result.code==200){
+                                            $id.toggleClass('collected')
+                                            num = $id.next().text()
+                                            num = parseInt(num)
+                                            $id.next().html(num+1)
+                                        }else{
+                                            alert(result.error)
+                                        }
+                                    }
+                                })
+                            }else{
+                                $.ajax({
+                                    type:'delete',
+                                    dataType:'json',
+                                    url:'/albums/album/collect',
+                                    data:JSON.stringify(data_dic),
+                                    beforeSend:function(request){
+                                        var token = window.localStorage.getItem('syq_token')
+                                        request.setRequestHeader('Authorization',token);
+                                    },
+                                    success:function(result){
+                                        if(result.code==200){
+                                            $id.toggleClass('collected')
+                                            num = $id.next().text()
+                                            num = parseInt(num)
+                                            $id.next().html(num-1)
+                                        }else{
+                                            alert(result.error)
+                                        }
+                                    }
+                                })
+                            }  
+                        })
+                    }else{
+                        alert(result.error)
+                    }
+                }
+            })
+        })
+        $('.relation').click(
+            function (){
+                data = {"username":username,"ownername":ownername}
+                $.ajax({
+                    type:'post',
+                    contentType:'application/json',
+                    dataType:'json',
+                    url:'/user/relation',
+                    data:JSON.stringify(data),
+                    beforeSend:function(request){
+                        var token = window.localStorage.getItem('syq_token')
+                        request.setRequestHeader("Authorization", token);
+                    },
+                    success:function(result){
+                        if (result.code==200){
+                            alert('关注成功')
+                            window.location.reload();
+                        }else{
+                            alert(result.error)
+                            window.location='/user/login'
+                        }
+                    }
+                })
+            }
+        )
+    </script>
+</body>
+</html>

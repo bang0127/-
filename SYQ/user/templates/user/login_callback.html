@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>微博授权</title>
+    <script src="/static/js/jquery-1.11.3.js"></script>
+</head>
+<body>
+
+    <script>
+        function getQueryString(v){
+            var query = window.location.search.substring(1);
+            var data = query.split('&');
+            for (var i=0;i<data.length;i++){
+                //state=123
+                var par = data[i].split('=');
+                if (par[0]==v){
+                    return par[1]
+                }
+            }
+            return null;
+        }
+        $(function(){
+            code = getQueryString('code');
+            console.log(code)
+            $.ajax({
+                    type:'get',
+                    dataType:'json',
+                    url:'http://127.0.0.1:8000/user/weibo/token?code='+ code,
+                    success:function(result){
+                        console.log(result);
+                        if(result.code==200){
+                            window.localStorage.setItem('syq_token',result.data.token);
+                            window.localStorage.setItem('syq_user',result.username);
+                            alert('登录成功')
+
+                            window.location =  '/index';
+                        }else if(result.code==20112){
+                            var wuid = result.wuid;
+                            window.location = '/user/register?wuid='+wuid;
+                        }
+                    }
+
+                })
+        })
+    </script>
+</body>
+</html>
